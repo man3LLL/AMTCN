@@ -21,13 +21,8 @@ class addAttention(Layer):
         hidden_states = inputs
         # print(hidden_states.shape())
         hidden_size = int(hidden_states.shape[2])
-        # Inside dense layer
-        #              hidden_states            dot               W            =>           score_first_part
-        # (batch_size, time_steps, hidden_size) dot (hidden_size, hidden_size) => (batch_size, time_steps, hidden_size)
-        # W is the trainable weight matrix of attention Luong's multiplicative style score
         score_first_part = Dense(hidden_size, use_bias=False, name='attention_score_vec'+str(self.static_var))(hidden_states)
         #            score_first_part           dot        last_hidden_state     => attention_weights
-        # (batch_size, time_steps, hidden_size) dot   (batch_size, hidden_size)  => (batch_size, time_steps)
         h_t = Lambda(lambda x: x[:, -1, :], output_shape=(hidden_size,), name='last_hidden_state'+str(self.static_var))(hidden_states)
         score = Dot(axes=[1, 2], name='attention_score'+str(self.static_var))([h_t, score_first_part])
         attention_weights = Activation('softmax', name='attention_weight'+str(self.static_var))(score)
